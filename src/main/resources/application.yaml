@@ -49,3 +49,20 @@ app:
 
 server:
   port: 8085 # Rodando em porta diferente da 8080 para evitar conflitos
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
