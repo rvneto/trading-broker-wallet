@@ -19,15 +19,18 @@ public class OrderEventConsumer {
             groupId = "broker-wallet-api"
     )
     public void consume(OrderEventDTO event) {
+        log.info("Order event received: ID {} | Status {} | User {}", event.getOrderId(), event.getStatus(), event.getUserId());
         try {
             switch (event.getStatus()) {
                 case "PENDING" -> walletService.reserveBalance(event);
                 case "FILLED" -> walletService.settleOrder(event);
                 case "REJECTED" -> walletService.refundBalance(event);
-                default -> log.info("Evento com status {} ignorado pela Wallet", event.getStatus());
+                default -> log.warn("Event with status {} not handled by Wallet", event.getStatus());
             }
         } catch (Exception e) {
-            log.error("Erro crítico ao processar evento financeiro da ordem {}: {}", event.getOrderId(), e.getMessage());
+            log.error("Critical error processing financial event for order {}: {}", event.getOrderId(), e.getMessage(), e);
+            // Rethrow so Kafka can apply retry/DLQ policy instead of silently discarding
+            throw e;
         }
     }
 }
